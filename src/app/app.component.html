@@ -3,7 +3,7 @@
     <div class="col-lg-8">
       <div class="card">
         <div class="card-header bg-success">
-          <h6>Employee List</h6>
+          <h6 class="text-white">Employee List</h6>
         </div>
         <div class="card-body">
           <div class="row">
@@ -26,8 +26,8 @@
                       <td>{{item.emailId}}</td>
                       <td>{{item.contactNo}}</td>
                       <td class="text-center">
-                        <button class="btn btn-sm btn-primary">Edit</button>
-                        <button class="btn btn-sm btn-danger ms-2">Delete</button>
+                        <button class="btn btn-sm btn-primary" (click)="onEdit(item)">Edit</button>
+                        <button class="btn btn-sm btn-danger ms-2" (click)="onDelete(item.empId)">Delete</button>
                       </td>
                     </tr>
                   }
@@ -42,10 +42,15 @@
     <div class="col-lg-4">
       <div class="card">
         <div class="card-header bg-success">
-          <h6>New Employee</h6>
+          @if(employeeForm.controls['empId'].value == 1){
+            <h6 class="text-white">New Employee</h6>
+          }
+          @else {
+            <h6 class="text-white">Update Employee</h6>
+          }
         </div>
         <div class="card-body">
-          <form [formGroup]="employeeFrom">
+          <form [formGroup]="employeeForm">
             <div class="row">
               <div class="col-lg-12">
                 <label for="">Name</label>
@@ -78,10 +83,15 @@
             </div>
             <div class="row mt-3">
               <div class="col-lg-6 text-center">
-                <button class="btn btn-secondary">Reset</button>
+                <button class="btn btn-secondary" (click)="reset()">Reset</button>
               </div>
               <div class="col-lg-6 text-center">
-                <button class="btn btn-success" (click)="onAdd()">Add Employee</button>
+                @if (employeeForm.controls['empId'].value == 1) {
+                  <button class="btn btn-success" type="button" [disabled]="employeeForm.invalid" (click)="onAdd()">Add Employee</button>
+                }
+                @else{
+                  <button class="btn btn-warning" type="button" [disabled]="employeeForm.invalid" (click)="onUpdate()">Update Employee</button>
+                }
               </div>
             </div>
           </form>

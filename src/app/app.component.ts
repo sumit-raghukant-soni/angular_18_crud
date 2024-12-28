@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { EmployeeModel } from './model/EmployeeModel';
 
@@ -11,7 +11,7 @@ import { EmployeeModel } from './model/EmployeeModel';
 })
 export class AppComponent {
   
-  employeeFrom: FormGroup = new FormGroup({});
+  employeeForm: FormGroup = new FormGroup({});
   employeeObj: EmployeeModel = new EmployeeModel();
   employeeList: EmployeeModel[] = [];
 
@@ -26,16 +26,21 @@ export class AppComponent {
   }
 
   createForm(){
-    this.employeeFrom = new FormGroup({
+    this.employeeForm = new FormGroup({
         empId: new FormControl(this.employeeObj.empId),
-        name: new FormControl(this.employeeObj.name),
+        name: new FormControl(this.employeeObj.name, [Validators.required]),
         state: new FormControl(this.employeeObj.state),
         city: new FormControl(this.employeeObj.city),
         address: new FormControl(this.employeeObj.address),
-        pincode: new FormControl(this.employeeObj.pincode),
-        contactNo: new FormControl(this.employeeObj.contactNo),
+        pincode: new FormControl(this.employeeObj.pincode, [Validators.required, Validators.minLength(6)]),
+        contactNo: new FormControl(this.employeeObj.contactNo, [Validators.required, Validators.minLength(10), Validators.maxLength(10)]),
         emailId: new FormControl(this.employeeObj.emailId),
     })
+  }
+
+  reset(){
+    this.employeeObj = new EmployeeModel();
+    this.createForm();
   }
 
   onAdd(){
@@ -43,12 +48,40 @@ export class AppComponent {
     const oldData = localStorage.getItem("EmpData");
     if(oldData != null){
       const parseData = JSON.parse(oldData);
-      this.employeeFrom.controls['empId'].setValue(parseData.length + 1);
-      this.employeeList.unshift(this.employeeFrom.value);
+      this.employeeForm.controls['empId'].setValue(parseData.length + 1);
+      this.employeeList.unshift(this.employeeForm.value);
     }
     else{
-      this.employeeList.unshift(this.employeeFrom.value);
+      this.employeeList.unshift(this.employeeForm.value);
     }
     localStorage.setItem("EmpData", JSON.stringify(this.employeeList));
+    this.reset();
+  }
+
+
+  onEdit(item: EmployeeModel){
+    this.employeeObj = item;
+    this.createForm();
+  }
+
+  onUpdate(){
+    const record = this.employeeList.find(m => m.empId == this.employeeForm.controls['empId'].value );
+    if(record != undefined){
+      record.address = this.employeeForm.controls['address'].value;
+      record.name = this.employeeForm.controls['name'].value;
+      record.contactNo = this.employeeForm.controls['contactNo'].value;
+    }
+
+    localStorage.setItem('EmpData', JSON.stringify(this.employeeList));
+    this.reset();
+  }
+
+  onDelete(empId: number){
+    const isConfirmedToDelete = confirm("Are your sure you want to delete?");
+    if(isConfirmedToDelete){
+      const index = this.employeeList.findIndex(m=>m.empId == empId);
+      this.employeeList.splice(index, 1);
+      localStorage.setItem('EmpData', JSON.stringify(this.employeeList));
+    }
   }
 }
